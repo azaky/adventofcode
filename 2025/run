@@ -1,0 +1,33 @@
+#!/bin/bash
+
+FILE="$1"
+BUILD_DIR="_build"
+INTERPRETER="$BUILD_DIR/ocaml-core"
+
+# 1. Add .ml extension if missing
+if [[ "$FILE" != *.ml ]]; then
+  FILE="${FILE}.ml"
+fi
+
+if [ ! -f "$FILE" ]; then
+  echo "Error: File '$FILE' not found."
+  exit 1
+fi
+
+# 2. Lazily create the custom interpreter if it's missing
+if [ ! -f "$INTERPRETER" ]; then
+  echo "Initializing custom OCaml environment..."
+  mkdir -p "$BUILD_DIR"
+  # Build custom toplevel
+  ocamlfind ocamlmktop -thread -package core -linkpkg -o "$INTERPRETER"
+fi
+
+# 3. Calculate Include Paths
+#    -r: recursive (get dependencies too)
+#    -i-format: output as "-I /path/..." flags
+INCLUDE_PATHS=$(ocamlfind query -r -i-format core)
+
+# 4. Run!
+#    We pass the INCLUDE_PATHS so the interpreter can find 'Core.cmi'
+#    -w -24: Suppress bad module name warning
+time "$INTERPRETER" $INCLUDE_PATHS -w -24 "$FILE"
