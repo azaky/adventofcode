@@ -3,5 +3,6 @@
         "kind": "opam",
         "switch": "default"
     },
-    "ocaml.server.args": ["--fallback-read-dot-merlin"]
+    "ocaml.server.args": ["--fallback-read-dot-merlin"],
+    "editor.tabSize": 2
 }
